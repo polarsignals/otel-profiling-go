@@ -7,7 +7,7 @@ import (
 	"net"
 
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
-	"github.com/polarsignals/otel-profiling-go/otelgrpcprofiling"
+	otelprof "github.com/polarsignals/otel-profiling-go"
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/stdout/stdouttrace"
@@ -26,15 +26,12 @@ func main() {
 		log.Fatalf("failed to listen; %v", err)
 	}
 
-	grpcotelprof := otelgrpcprofiling.NewMiddleware()
 	server := grpc.NewServer(
 		grpc_middleware.WithUnaryServerChain(
 			otelgrpc.UnaryServerInterceptor(),
-			grpcotelprof.GrpcUnaryInterceptor,
 		),
 		grpc_middleware.WithStreamServerChain(
 			otelgrpc.StreamServerInterceptor(),
-			grpcotelprof.GrpcStreamInterceptor,
 		),
 	)
 
@@ -75,9 +72,11 @@ func initTracer() *trace.TracerProvider {
 		trace.WithSampler(trace.AlwaysSample()),
 		trace.WithBatcher(exporter),
 	)
-	otel.SetTextMapPropagator(propagation.NewCompositeTextMapPropagator(
-		propagation.TraceContext{},
-		propagation.Baggage{},
-	))
+	otel.SetTextMapPropagator(
+		otelprof.NewTextMapPropagatorWithProfiling(
+			propagation.NewCompositeTextMapPropagator(
+				propagation.TraceContext{},
+				propagation.Baggage{},
+			)))
 	return tp
 }

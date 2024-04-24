@@ -6,7 +6,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/polarsignals/otel-profiling-go/otelhttpprofiling"
+	otelprof "github.com/polarsignals/otel-profiling-go"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/stdout/stdouttrace"
@@ -18,7 +18,7 @@ func main() {
 	otel.SetTracerProvider(initTracer())
 
 	err := http.ListenAndServe(":3000",
-		otelhttp.NewHandler(otelhttpprofiling.Handler(http.HandlerFunc(fibHandler)), "fibHandler"),
+		otelhttp.NewHandler(http.HandlerFunc(fibHandler), "fibHandler"),
 	)
 	if !errors.Is(err, http.ErrServerClosed) {
 		log.Fatal(err)
@@ -49,9 +49,11 @@ func initTracer() *trace.TracerProvider {
 		trace.WithSampler(trace.AlwaysSample()),
 		trace.WithBatcher(exporter),
 	)
-	otel.SetTextMapPropagator(propagation.NewCompositeTextMapPropagator(
-		propagation.TraceContext{},
-		propagation.Baggage{},
-	))
+	otel.SetTextMapPropagator(
+		otelprof.NewTextMapPropagatorWithProfiling(
+			propagation.NewCompositeTextMapPropagator(
+				propagation.TraceContext{},
+				propagation.Baggage{},
+			)))
 	return tp
 }
