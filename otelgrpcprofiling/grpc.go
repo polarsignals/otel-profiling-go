@@ -53,7 +53,7 @@ func (m *Middleware) GrpcUnaryInterceptor(
 		)
 
 		if traceID != "" {
-			pprof.Do(ctx, pprof.Labels("otel.traceid", traceID), func(ctx context.Context) {
+			pprof.Do(ctx, pprof.Labels("otel_traceid", traceID), func(ctx context.Context) {
 				res, err = handler(ctx, req)
 			})
 
@@ -107,7 +107,7 @@ func (m *Middleware) GrpcStreamInterceptor(
 
 			err error
 		)
-		pprof.Do(ctx, pprof.Labels("otel.traceid", traceID), func(ctx context.Context) {
+		pprof.Do(ctx, pprof.Labels("otel_traceid", traceID), func(ctx context.Context) {
 			err = handler(srv, ss)
 		})
 
