@@ -14,7 +14,7 @@ func Handler(h http.Handler) http.Handler {
 		traceID := trace.SpanContextFromContext(ctx).TraceID().String()
 
 		if traceID != "" {
-			pprof.Do(ctx, pprof.Labels("otel.traceid", traceID), func(ctx context.Context) {
+			pprof.Do(ctx, pprof.Labels("otel_traceid", traceID), func(ctx context.Context) {
 				h.ServeHTTP(w, r.WithContext(ctx))
 			})
 			return

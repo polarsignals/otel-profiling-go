@@ -51,7 +51,7 @@ func (w *profileTracer) Start(ctx context.Context, spanName string, opts ...trac
 	}
 
 	if traceID != "" {
-		ctx = pprof.WithLabels(ctx, pprof.Labels("otel.traceid", traceID))
+		ctx = pprof.WithLabels(ctx, pprof.Labels("otel_traceid", traceID))
 		pprof.SetGoroutineLabels(ctx)
 	}
 	return ctx, &s
